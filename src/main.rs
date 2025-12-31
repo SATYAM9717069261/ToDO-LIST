@@ -1,50 +1,56 @@
 mod todolist;
-use clap::Parser;
+use std::io::{self, Write};
 
-#[derive(Parser)]
 struct Cli {
     command: String,
     key: Option<String>,
 }
 
 fn main() {
-    let args = Cli::parse();
     let mut todo = todolist::TodoList::new();
-    let result = match args.command.as_str() {
-        "add" => match args.key {
-            Some(key) => {
-                todo.add(key);
-                Ok(())
-            }
-            None => Err("Key cannot be empty!".to_string()),
-        },
-        "mark-done" => match args.key {
-            Some(key) => todo
-                .mark(key, false)
-                .map_err(|e| format!("Invalid key {}", e))
-                .and(Ok(())),
-            None => Err("Key cannot be empty!".to_string()),
-        },
-        "list" => {
-            let (todo_items, done_items) = todo.list();
 
-            println!("# TO DO");
-            println!();
-            todo_items.for_each(|x| println!(" * {}", x));
+    loop {
+        print!("> ");
+        io::stdout().flush().unwrap();
 
-            println!();
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
 
-            println!("# DONE");
-            println!();
-            done_items.for_each(|x| println!(" * {}", x));
+        let input = input.trim();
 
-            Ok(())
+        if input == "q" || input == "exit" {
+            println!("exit");
+            break;
         }
-        cmd => Err(format!("Command {} not recognised", cmd)),
-    };
 
-    match result {
-        Err(e) => println!("ERROR: {}", e),
-        Ok(_) => println!("SUCCESS"),
+        // split input like: add buy-milk
+        let mut parts = input.splitn(2, ' ');
+        let command = parts.next().unwrap();
+        let key = parts.next();
+
+        match command {
+            "add" => {
+                if let Some(k) = key {
+                    todo.add(k.to_string());
+                } else {
+                    println!("Key missing");
+                }
+            }
+            "done" => {
+                if let Some(k) = key {
+                    if let Err(e) = todo.mark(k.to_string(), false) {
+                        println!("Error: {}", e);
+                    }
+                }
+            }
+            "list" => {
+                let (todo_items, done_items) = todo.list();
+                println!("TODO");
+                todo_items.for_each(|x| println!(" -> {}", x));
+                println!("DONE");
+                done_items.for_each(|x| println!(" -> {}", x));
+            }
+            _ => println!("command Not Exist"),
+        }
     }
 }

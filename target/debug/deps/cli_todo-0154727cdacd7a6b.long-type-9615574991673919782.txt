@@ -1,0 +1,1 @@
+(Map<Filter<std::collections::hash_map::Iter<'_, String, bool>, {closure@src/todolist.rs:34:38: 34:41}>, {closure@src/todolist.rs:34:60: 34:63}>, Map<Filter<std::collections::hash_map::Iter<'_, String, bool>, {closure@src/todolist.rs:35:38: 35:41}>, {closure@src/todolist.rs:35:61: 35:64}>)
